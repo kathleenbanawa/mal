@@ -59,8 +59,11 @@ matlab_MODE = octave
 python_MODE = python
 # scheme (chibi, kawa, gauche, chicken, sagittarius, cyclone, foment)
 scheme_MODE = chibi
-# js wace_libc wace_fooboot
-wasm_MODE = wace_libc
+# wasmtime js node wace_libc wace_fooboot
+wasm_MODE = wasmtime
+
+# Path to loccount for counting LOC stats
+LOCCOUNT = loccount
 
 # Extra options to pass to runtest.py
 TEST_OPTS =
@@ -81,12 +84,12 @@ DOCKERIZE =
 # Implementation specific settings
 #
 
-IMPLS = ada awk bash basic c chuck clojure coffee common-lisp cpp crystal cs d dart \
+IMPLS = ada ada.2 awk bash basic c chuck clojure coffee common-lisp cpp crystal cs d dart \
 	elisp elixir elm erlang es6 factor fantom forth fsharp go groovy gnu-smalltalk \
 	guile haskell haxe hy io java js julia kotlin livescript logo lua make mal \
 	matlab miniMAL nasm nim objc objpascal ocaml perl perl6 php picolisp plpgsql \
 	plsql powershell ps python r racket rexx rpython ruby rust scala scheme skew \
-	swift swift3 tcl ts vb vhdl vimscript wasm yorick
+	swift swift3 swift4 tcl ts vb vhdl vimscript wasm yorick
 
 EXTENSION = .mal
 
@@ -173,6 +176,7 @@ scheme_STEP_TO_PROG_foment      = scheme/$($(1)).scm
 
 # Map of step (e.g. "step8") to executable file for that step
 ada_STEP_TO_PROG =     ada/$($(1))
+ada.2_STEP_TO_PROG =   ada.2/$($(1))
 awk_STEP_TO_PROG =     awk/$($(1)).awk
 bash_STEP_TO_PROG =    bash/$($(1)).sh
 basic_STEP_TO_PROG =   $(basic_STEP_TO_PROG_$(basic_MODE))
@@ -239,6 +243,7 @@ scheme_STEP_TO_PROG =  $(scheme_STEP_TO_PROG_$(scheme_MODE))
 skew_STEP_TO_PROG =    skew/$($(1)).js
 swift_STEP_TO_PROG =   swift/$($(1))
 swift3_STEP_TO_PROG =  swift3/$($(1))
+swift4_STEP_TO_PROG =  swift4/$($(1))
 tcl_STEP_TO_PROG =     tcl/$($(1)).tcl
 ts_STEP_TO_PROG =      ts/$($(1)).js
 vb_STEP_TO_PROG =      vb/$($(1)).exe
@@ -335,6 +340,8 @@ DOCKER_BUILD = $(foreach impl,$(DO_IMPLS),docker-build^$(impl))
 DOCKER_SHELL = $(foreach impl,$(DO_IMPLS),docker-shell^$(impl))
 
 IMPL_PERF = $(foreach impl,$(filter-out $(perf_EXCLUDES),$(DO_IMPLS)),perf^$(impl))
+
+IMPL_STATS = $(foreach impl,$(DO_IMPLS),stats^$(impl))
 
 IMPL_REPL = $(foreach impl,$(DO_IMPLS),repl^$(impl))
 ALL_REPL = $(strip $(sort \
@@ -453,6 +460,19 @@ $(ALL_REPL): $$(call $$(word 2,$$(subst ^, ,$$(@)))_STEP_TO_PROG,$$(word 3,$$(su
 $(IMPL_REPL): $$@^stepA
 
 #
+# Stats test rules
+#
+
+# For a concise summary:
+#   make stats | egrep -A1 "^Stats for|^all" | egrep -v "^all|^--"
+stats: $(IMPL_STATS)
+
+$(IMPL_STATS):
+	@$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
+	  echo "Stats for $(impl):"; \
+	  $(LOCCOUNT) -x "Makefile|node_modules" $(impl))
+
+#
 # Utility functions
 #
 print-%:
@@ -479,10 +499,6 @@ recur_impls_ = $(filter-out $(foreach impl,$($(1)_EXCLUDES),$(1)^$(impl)),$(fore
 
 # recursive clean
 $(eval $(call recur_template,clean,$(call recur_impls_,clean)))
-
-# recursive stats
-$(eval $(call recur_template,stats,$(call recur_impls_,stats)))
-$(eval $(call recur_template,stats-lisp,$(call recur_impls_,stats-lisp)))
 
 # recursive dist
 $(eval $(call recur_template,dist,$(call recur_impls_,dist)))
