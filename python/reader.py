@@ -28,16 +28,14 @@ def read_atom(reader):
             return MalTrue()
         elif token == 'false':
             return MalFalse()
-        elif token in ['+','-','*','/',"def!","let*"]:
-            return MalSymbol(token)
         else:
-            return token
+            return MalSymbol(token)
 
 def read_list(reader):
     rn = []
     while True:
         form = read_form(reader)
-        if form == ')':
+        if isinstance(form, MalSymbol) and form.name == ')':
             break
         else:
             rn.append(form)
@@ -47,7 +45,7 @@ def read_vector(reader):
     rn = MalVector()
     while True:
         form = read_form(reader)
-        if form == ']':
+        if isinstance(form, MalSymbol) and form.name == ']':
             break
         else:
             rn.elements.append(form)

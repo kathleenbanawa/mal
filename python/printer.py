@@ -24,3 +24,5 @@ def pr_str(ast, print_readably=False):
         for e in ast.elements:
             result.append(pr_str(e))
         return "[" + " ".join(result) + "]"
+    else:
+        print(ast)
