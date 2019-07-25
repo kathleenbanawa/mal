@@ -56,7 +56,7 @@ haxe_MODE = neko
 # octave or matlab
 matlab_MODE = octave
 # python, python2 or python3
-python_MODE = python
+python_MODE = python3
 # scheme (chibi, kawa, gauche, chicken, sagittarius, cyclone, foment)
 scheme_MODE = chibi
 # wasmtime js node wace_libc wace_fooboot
