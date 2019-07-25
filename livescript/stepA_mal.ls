@@ -330,6 +330,9 @@ rep = (line) ->
     |> (ast) -> pr_str ast, print_readably=true
 
 
+# Define not.
+rep '(def! not (fn* (x) (if x false true)))'
+
 # Define load-file.
 rep '
 (def! load-file 
@@ -348,26 +351,6 @@ rep '
           (nth xs 1)
           (throw "odd number of forms to cond"))
         (cons \'cond (rest (rest xs)))))))'
-
-rep '(def! *gensym-counter* (atom 0))'
-
-rep '
-(def! gensym
-  (fn* []
-    (symbol
-      (str "G__"
-        (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))'
-
-rep '
-(defmacro! or
-  (fn* (& xs)
-    (if (empty? xs)
-      nil
-      (if (= 1 (count xs))
-        (first xs)
-        (let* (condvar (gensym))
-          `(let* (~condvar ~(first xs))
-            (if ~condvar ~condvar (or ~@(rest xs)))))))))'
 
 # Parse program arguments.
 # The first two (exe and core-file) are, respectively,

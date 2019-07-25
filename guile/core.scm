@@ -150,7 +150,7 @@
    ((callable? c)
     (let ((cc (make-callable ht
                              (callable-unbox c)
-                             (and (hash-table? ht) (hash-ref ht "ismacro"))
+                             #f
                              (callable-closure c))))
       cc))
    (else
@@ -188,8 +188,6 @@
         #f
         str)))
 
-(define (_not o) (or (_nil? o) (not o)))
-
 (define (_true? x) (eq? x #t))
 (define (_false? x) (eq? x #f))
 
@@ -218,7 +216,6 @@
     (-           ,-)
     (*           ,*)
     (/           ,/)
-    (not         ,_not)
     (pr-str      ,pr-str)
     (str         ,str)
     (prn         ,prn)

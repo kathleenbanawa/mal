@@ -65,7 +65,7 @@
     (local $mac_env i64)
     (LET $ast $orig_ast
          $mac 0)
-    (global.set $mac_stack (STATIC_ARRAY 1024)) ;; 256 * 4, TODO: move to init
+    (global.set $mac_stack (STATIC_ARRAY 2048)) ;; 512 * 4, TODO: move to init
     (block $done
       (loop $loop
         (br_if $done
@@ -87,7 +87,7 @@
           (then
             (global.set $mac_stack_top
                         (i32.add (global.get $mac_stack_top) 1))
-            (if (i32.ge_s (i32.mul (global.get $mac_stack_top) 4) 1024) ;; 256 * 4
+            (if (i32.ge_s (i32.mul (global.get $mac_stack_top) 4) 2048) ;; 512 * 4
               ($fatal 7 "Exhausted mac_stack!\n"))
             (i32.store (i32.add
                          (global.get $mac_stack)
@@ -493,7 +493,6 @@
     ($RELEASE ($RE "(def! not (fn* (a) (if a false true)))" $repl_env))
     ($RELEASE ($RE "(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))" $repl_env))
     ($RELEASE ($RE "(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))" $repl_env))
-    ($RELEASE ($RE "(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) `(let* (or_FIXME ~(first xs)) (if or_FIXME or_FIXME (or ~@(rest xs))))))))" $repl_env))
 
 
     ;; Command line arguments

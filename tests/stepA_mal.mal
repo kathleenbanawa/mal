@@ -24,6 +24,33 @@
 ;; ------- (Needed for self-hosting) -------
 
 ;;
+;;
+;; Testing hash-map evaluation and atoms (i.e. an env)
+(def! e (atom {"+" +}))
+(swap! e assoc "-" -)
+( (get @e "+") 7 8)
+;=>15
+( (get @e "-") 11 8)
+;=>3
+(swap! e assoc "foo" (list))
+(get @e "foo")
+;=>()
+(swap! e assoc "bar" '(1 2 3))
+(get @e "bar")
+;=>(1 2 3)
+
+;; Testing for presence of optional functions
+(do (list time-ms string? number? seq conj meta with-meta fn?) nil)
+;=>nil
+
+;; ------------------------------------------------------------------
+
+;>>> soft=True
+;>>> optional=True
+;;
+;; ------- Optional Functionality --------------
+;; ------- (Not needed for self-hosting) -------
+
 ;; Testing metadata on functions
 
 ;;
@@ -64,7 +91,6 @@
 (meta +)
 ;=>nil
 
-
 ;;
 ;; Make sure closures and metadata co-exist
 (def! gen-plusX (fn* (x) (with-meta (fn* (b) (+ x b)) {"meta" 1})))
@@ -80,29 +106,6 @@
 ;=>{"meta" 2}
 (meta plus8)
 ;=>{"meta" 1}
-
-;;
-;; Testing hash-map evaluation and atoms (i.e. an env)
-(def! e (atom {"+" +}))
-(swap! e assoc "-" -)
-( (get @e "+") 7 8)
-;=>15
-( (get @e "-") 11 8)
-;=>3
-(swap! e assoc "foo" (list))
-(get @e "foo")
-;=>()
-(swap! e assoc "bar" '(1 2 3))
-(get @e "bar")
-;=>(1 2 3)
-
-;; ------------------------------------------------------------------
-
-;>>> soft=True
-;>>> optional=True
-;;
-;; ------- Optional Functionality --------------
-;; ------- (Not needed for self-hosting) -------
 
 ;;
 ;; Testing string? function
@@ -146,6 +149,8 @@
 ;=>false
 (fn? :+)
 ;=>false
+(fn? ^{"ismacro" true} (fn* () 0))
+;=>true
 
 ;; Testing macro? function
 (macro? cond)
@@ -157,6 +162,8 @@
 (macro? "+")
 ;=>false
 (macro? :+)
+;=>false
+(macro? {})
 ;=>false
 
 
@@ -222,10 +229,19 @@
 (meta (with-meta [1 2 3] "abc"))
 ;=>"abc"
 
+(with-meta [] "abc")
+;=>[]
+
 (meta (with-meta (list 1 2 3) {"a" 1}))
 ;=>{"a" 1}
 
 (list? (with-meta (list 1 2 3) {"a" 1}))
+;=>true
+
+(with-meta (list) {"a" 1})
+;=>()
+
+(empty? (with-meta (list) {"a" 1}))
 ;=>true
 
 (meta (with-meta {"abc" 123} {"a" 1}))
@@ -234,9 +250,8 @@
 (map? (with-meta {"abc" 123} {"a" 1}))
 ;=>true
 
-;;; Not actually supported by Clojure
-;;;(meta (with-meta (atom 7) {"a" 1}))
-;;;;=>{"a" 1}
+(with-meta {} {"a" 1})
+;=>{}
 
 (def! l-wm (with-meta [4 5 6] {"b" 2}))
 ;=>[4 5 6]
@@ -258,19 +273,27 @@
 (meta +)
 ;=>nil
 
-;;
-;; Testing gensym and clean or macro
-(= (gensym) (gensym))
-;=>false
-(let* [or_FIXME 23] (or false (+ or_FIXME 100)))
-;=>123
+;; Loading sumdown from computations.mal
+(load-file "../tests/computations.mal")
 
 ;;
 ;; Testing time-ms function
 (def! start-time (time-ms))
 (= start-time 0)
 ;=>false
-(let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 10)) ; Waste some time
+(sumdown 10) ; Waste some time
 ;=>55
 (> (time-ms) start-time)
 ;=>true
+
+;;
+;; Test that defining a macro does not mutate an existing function.
+(def! f (fn* [x] (number? x)))
+(defmacro! m f)
+(f (+ 1 1))
+;=>true
+(m (+ 1 1))
+;=>false
+
+(meta (with-meta (atom 7) {"a" 1}))
+;=>{"a" 1}

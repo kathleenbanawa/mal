@@ -25,6 +25,10 @@
 (slurp "../tests/test.txt")
 ;=>"A line of text\n"
 
+;;; Load the same file twice.
+(slurp "../tests/test.txt")
+;=>"A line of text\n"
+
 ;; Testing load-file
 
 (load-file "../tests/inc.mal")
@@ -86,23 +90,16 @@
 ;=>9
 
 ;>>> deferrable=True
-;>>> optional=True
 ;;
-;; -------- Deferrable/Optional Functionality --------
+;; -------- Deferrable Functionality --------
 
-;; Testing comments in a file
-(load-file "../tests/incB.mal")
-;/"incB.mal finished"
-;=>"incB.mal return string"
-(inc4 7)
-;=>11
-(inc5 7)
-;=>12
-
-;; Testing map literal across multiple lines in a file
-(load-file "../tests/incC.mal")
-mymap
-;=>{"a" 1}
+;; Testing reading of large files
+(load-file "../tests/computations.mal")
+;=>nil
+(sumdown 2)
+;=>3
+(fib 2)
+;=>1
 
 ;; Testing `@` reader macro (short for `deref`)
 (def! atm (atom 9))
@@ -118,15 +115,59 @@ mymap
 (g 3)
 ;=>81
 
-;; Checking that eval does not use local environments.
-(def! a 1)
-;=>1
-(let* (a 2) (eval (read-string "a")))
-;=>1
-
 ;;
 ;; Testing that *ARGV* exists and is an empty list
 (list? *ARGV*)
 ;=>true
 *ARGV*
 ;=>()
+
+;>>> soft=True
+;>>> optional=True
+;;
+;; -------- Optional Functionality --------
+
+;; Testing comments in a file
+(load-file "../tests/incB.mal")
+;/"incB.mal finished"
+;=>"incB.mal return string"
+(inc4 7)
+;=>11
+(inc5 7)
+;=>12
+
+;; Testing map literal across multiple lines in a file
+(load-file "../tests/incC.mal")
+mymap
+;=>{"a" 1}
+
+;; Checking that eval does not use local environments.
+(def! a 1)
+;=>1
+(let* (a 2) (eval (read-string "a")))
+;=>1
+
+;; Non alphanumeric characters in comments in read-string
+(read-string "1;!")
+;=>1
+(read-string "1;\"")
+;=>1
+(read-string "1;#")
+;=>1
+(read-string "1;$")
+;=>1
+(read-string "1;%")
+;=>1
+(read-string "1;'")
+;=>1
+(read-string "1;\\")
+;=>1
+(read-string "1;\\\\")
+;=>1
+(read-string "1;\\\\\\")
+;=>1
+(read-string "1;`")
+;=>1
+;;; Hopefully less problematic characters can be checked together
+(read-string "1; &()*+,-./:;<=>?@[]^_{|}~")
+;=>1

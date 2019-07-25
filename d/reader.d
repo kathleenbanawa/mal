@@ -44,7 +44,7 @@ class Reader
     }
 }
 
-auto tokenize_ctr = ctRegex!(r"[\s,]*(~@|[\[\]{}()'`~^@]|" `"` `(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"` r"`,;)]*)");
+auto tokenize_ctr = ctRegex!(r"[\s,]*(~@|[\[\]{}()'`~^@]|" ~ `"` ~ `(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"` ~ r"`,;)]*)");
 
 string[] tokenize(string str)
 {
@@ -63,7 +63,7 @@ MalString parse_string(string token)
 {
     // TODO: this could be done with replaceAll
     // https://dlang.org/library/std/regex/replace_all.html
-    string unescaped = 
+    string unescaped =
         token[1..$-1] // Remove surrounding quotes
         .replace("\\\\", "\u029e")
         .replace("\\n", "\n")
@@ -73,6 +73,7 @@ MalString parse_string(string token)
 }
 
 auto integer_ctr = ctRegex!(r"^-?[0-9]+$");
+auto string_ctr = ctRegex!(`^"(?:\\.|[^\\"])*"$`);
 
 MalType read_atom(Reader reader)
 {
@@ -87,7 +88,8 @@ MalType read_atom(Reader reader)
                 case ':':
                     return new MalString("\u029e" ~ token[1..$]);
                 case '"':
-                    if (token[$-1] != '"')
+                    auto captures = matchFirst(token, string_ctr);
+                    if (captures.empty())
                     {
                         throw new Exception("expected '\"', got EOF");
                     }

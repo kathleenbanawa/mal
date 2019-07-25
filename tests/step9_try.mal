@@ -3,8 +3,6 @@
 
 (throw "err1")
 ;/.*([Ee][Rr][Rr][Oo][Rr]|[Ee]xception).*err1.*
-(throw {:msg "err2"})
-;/.*([Ee][Rr][Rr][Oo][Rr]|[Ee]xception).*msg.*err2.*
 
 ;;
 ;; Testing try*/catch*
@@ -17,7 +15,7 @@
 ;=>nil
 
 ;; Make sure error from core can be caught
-(try* (nth [] 1) (catch* exc (prn "exc is:" exc)))
+(try* (nth () 1) (catch* exc (prn "exc is:" exc)))
 ;/"exc is:".*(length|range|[Bb]ounds|beyond).*
 ;=>nil
 
@@ -92,6 +90,10 @@
 ;; ------- Deferrable Functionality ----------
 ;; ------- (Needed for self-hosting) -------
 
+;; Testing throwing a hash-map
+(throw {:msg "err2"})
+;/.*([Ee][Rr][Rr][Oo][Rr]|[Ee]xception).*msg.*err2.*
+
 ;; Testing symbol and keyword functions
 (symbol? :abc)
 ;=>false
@@ -114,9 +116,6 @@
 
 (symbol "abc")
 ;=>abc
-;;;TODO: all implementations should suppport this too
-;;;(keyword :abc)
-;;;;=>:abc
 (keyword "abc")
 ;=>:abc
 
@@ -175,6 +174,7 @@
 (map? :abc)
 ;=>false
 
+
 ;;
 ;; Testing hash-maps
 (hash-map "a" 1)
@@ -231,6 +231,9 @@
 (keys hm2)
 ;=>("a")
 
+(keys {"1" 1})
+;=>("1")
+
 ;;; TODO: fix. Clojure returns nil but this breaks mal impl
 (vals hm1)
 ;=>()
@@ -252,9 +255,6 @@
 ;=>{:bcd 234}
 (keyword? (nth (keys {:abc 123 :def 456}) 0))
 ;=>true
-;;; TODO: support : in strings in make impl
-;;;(keyword? (nth (keys {":abc" 123 ":def" 456}) 0))
-;;;;=>false
 (keyword? (nth (vals {"a" :abc "b" :def}) 0))
 ;=>true
 
@@ -289,11 +289,11 @@
 ;=>"true \".\" false \".\" nil \".\" :keyw \".\" symb"
 
 (def! s (str {:abc "val1" :def "val2"}))
-(or (= s "{:abc val1 :def val2}") (= s "{:def val2 :abc val1}"))
+(cond (= s "{:abc val1 :def val2}") true (= s "{:def val2 :abc val1}") true)
 ;=>true
 
 (def! p (pr-str {:abc "val1" :def "val2"}))
-(or (= p "{:abc \"val1\" :def \"val2\"}") (= p "{:def \"val2\" :abc \"val1\"}"))
+(cond (= p "{:abc \"val1\" :def \"val2\"}") true (= p "{:def \"val2\" :abc \"val1\"}") true)
 ;=>true
 
 ;;
@@ -372,3 +372,10 @@
 (= [] {})
 ;=>false
 
+(map? cond)
+;=>false
+
+(keyword :abc)
+;=>:abc
+(keyword? (first (keys {":abc" 123 ":def" 456})))
+;=>false

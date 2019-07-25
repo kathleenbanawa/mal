@@ -29,20 +29,6 @@ void setupEnv(List<String> argv) {
       "          (nth xs 1) "
       "          (throw \"odd number of forms to cond\")) "
       "      (cons 'cond (rest (rest xs)))))))");
-  rep("(def! *gensym-counter* (atom 0))");
-  rep("(def! gensym "
-      "  (fn* [] "
-      "    (symbol (str \"G__\" (swap! *gensym-counter* "
-      "                                (fn* [x] (+ 1 x)))))))");
-  rep("(defmacro! or "
-      "  (fn* (& xs) "
-      "    (if (empty? xs) "
-      "        nil "
-      "        (if (= 1 (count xs)) "
-      "            (first xs) "
-      "            (let* (condvar (gensym)) "
-      "              `(let* (~condvar ~(first xs)) "
-      "                 (if ~condvar ~condvar (or ~@(rest xs)))))))))");
 }
 
 /// Returns `true` if [ast] is a macro call.
@@ -204,8 +190,7 @@ MalType EVAL(MalType ast, Env env) {
             ast = quasiquote(args.first);
             continue;
           } else if (symbol.value == 'macroexpand') {
-            ast = macroexpand(args.first, env);
-            continue;
+            return macroexpand(args.first, env);
           } else if (symbol.value == 'try*') {
             var body = args.first;
             if (args.length < 2) {
@@ -222,6 +207,8 @@ MalType EVAL(MalType ast, Env env) {
               MalType exceptionValue;
               if (e is MalException) {
                 exceptionValue = e.value;
+              } else if (e is reader.ParseException) {
+                exceptionValue = new MalString(e.message);
               } else {
                 exceptionValue = new MalString(e.toString());
               }

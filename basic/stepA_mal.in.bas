@@ -569,18 +569,6 @@ MAIN:
   A$=A$+" forms to cond"+CHR$(34)+")) (cons 'cond (rest (rest xs)))))))"
   GOSUB RE:AY=R:GOSUB RELEASE
 
-  A$="(def! *gensym-counter* (atom 0))"
-  GOSUB RE:AY=R:GOSUB RELEASE
-
-  A$="(def! gensym (fn* [] (symbol (str "+CHR$(34)+"G__"+CHR$(34)
-  A$=A$+" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"
-  GOSUB RE:AY=R:GOSUB RELEASE
-
-  A$="(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs)"
-  A$=A$+" (let* (c (gensym)) `(let* (~c ~(first xs))"
-  A$=A$+" (if ~c ~c (or ~@(rest xs)))))))))"
-  GOSUB RE:AY=R:GOSUB RELEASE
-
   REM load the args file
   A$="(def! -*ARGS*- (load-file "+CHR$(34)+".args.mal"+CHR$(34)+"))"
   GOSUB RE:AY=R:GOSUB RELEASE

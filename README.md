@@ -6,7 +6,7 @@
 
 **1. Mal is a Clojure inspired Lisp interpreter**
 
-**2. Mal is implemented in 75 languages (76 implementations total)**
+**2. Mal is implemented in 77 languages (78 different implementations and 99 runtime modes)**
 
 | Language | Creator |
 | -------- | ------- |
@@ -15,6 +15,7 @@
 | [GNU Awk](#gnu-awk) | [Miutsuru Kariya](https://github.com/kariya-mitsuru) |
 | [Bash 4](#bash-4) | [Joel Martin](https://github.com/kanaka)  |
 | [BASIC](#basic-c64-and-qbasic) (C64 &amp; QBasic) | [Joel Martin](https://github.com/kanaka) |
+| [BBC BASIC V](#bbc-basic-v) | [Ben Harris](https://github.com/bjh21) |
 | [C](#c) | [Joel Martin](https://github.com/kanaka)  |
 | [C++](#c-1) | [Stephen Thirlwall](https://github.com/sdt) |
 | [C#](#c-2) | [Joel Martin](https://github.com/kanaka)  |
@@ -62,7 +63,7 @@
 | [Perl 6](#perl-6) | [Hinrik Örn Sigurðsson](https://github.com/hinrik) |
 | [PHP](#php-53) | [Joel Martin](https://github.com/kanaka)  |
 | [Picolisp](#picolisp) | [Vasilij Schneidermann](https://github.com/wasamasa) |
-| [PL/pgSQL](#plpgsql-postgres-sql-procedural-language) (Postgres) | [Joel Martin](https://github.com/kanaka) |
+| [PL/pgSQL](#plpgsql-postgresql-sql-procedural-language) (PostgreSQL) | [Joel Martin](https://github.com/kanaka) |
 | [PL/SQL](#plsql-oracle-sql-procedural-language) (Oracle) | [Joel Martin](https://github.com/kanaka) |
 | [PostScript](#postscript-level-23) | [Joel Martin](https://github.com/kanaka)  |
 | [PowerShell](#powershell) | [Joel Martin](https://github.com/kanaka)  |
@@ -81,6 +82,7 @@
 | [Swift 4](#swift-4) | [陆遥](https://github.com/LispLY)  |
 | [Tcl](#tcl-86) | [Dov Murik](https://github.com/dubek) |
 | [TypeScript](#typescript) | [Masahiro Wakame](https://github.com/vvakame) |
+| [Vala](#vala) | [Simon Tatham](https://github.com/sgtatham) |
 | [VHDL](#vhdl) | [Dov Murik](https://github.com/dubek) |
 | [Vimscript](#vimscript) | [Dov Murik](https://github.com/dubek) |
 | [Visual Basic.NET](#visual-basicnet) | [Joel Martin](https://github.com/kanaka)  |
@@ -116,7 +118,7 @@ Here is the final diagram for [step A](process/guide.md#stepA):
 
 ![stepA_mal architecture](process/stepA_mal.png)
 
-If you are interesting in creating a mal implementation (or just
+If you are interested in creating a mal implementation (or just
 interested in using mal for something), please drop by the #mal
 channel on freenode. In addition to the [make-a-lisp process
 guide](process/guide.md) there is also a [mal/make-a-lisp
@@ -248,6 +250,22 @@ make MODE=qbasic stepX_YYY.bas
 Thanks to [Steven Syrek](https://github.com/sjsyrek) for the original
 inspiration for this implementation.
 
+### BBC BASIC V
+
+The BBC BASIC V implementation can run in the Brandy interpreter:
+
+```
+cd bbc-basic
+brandy -quit stepX_YYY.bbc
+```
+
+Or in ARM BBC BASIC V under RISC OS 3 or later:
+
+```
+*Dir bbc-basic.riscos
+*Run setup
+*Run stepX_YYY
+```
 
 ### C
 
@@ -764,17 +782,17 @@ cd picolisp
 ./run
 ```
 
-### PL/pgSQL (Postgres SQL Procedural Language)
+### PL/pgSQL (PostgreSQL SQL Procedural Language)
 
-The PL/pgSQL implementation of mal requires a running Postgres server
+The PL/pgSQL implementation of mal requires a running PostgreSQL server
 (the "kanaka/mal-test-plpgsql" docker image automatically starts
-a Postgres server). The implementation connects to the Postgres server
+a PostgreSQL server). The implementation connects to the PostgreSQL server
 and create a database named "mal" to store tables and stored
 procedures. The wrapper script uses the psql command to connect to the
 server and defaults to the user "postgres" but this can be overridden
 with the PSQL_USER environment variable. A password can be specified
 using the PGPASSWORD environment variable. The implementation has been
-tested with Postgres 9.4.
+tested with PostgreSQL 9.4.
 
 ```
 cd plpgsql
@@ -785,14 +803,14 @@ PSQL_USER=myuser PGPASSWORD=mypass ./wrap.sh stepX_YYY.sql
 
 ### PL/SQL (Oracle SQL Procedural Language)
 
-The PL/pgSQL implementation of mal requires a running Oracle DB
+The PL/SQL implementation of mal requires a running Oracle DB
 server (the "kanaka/mal-test-plsql" docker image automatically
 starts an Oracle Express server). The implementation connects to the
 Oracle server to create types, tables and stored procedures. The
-default SQL*Plus logon value (username/password@connect_identifier) is
+default SQL\*Plus logon value (username/password@connect_identifier) is
 "system/oracle" but this can be overridden with the ORACLE_LOGON
 environment variable. The implementation has been tested with Oracle
-Express Edition 11g Release 2. Note that any SQL*Plus connection
+Express Edition 11g Release 2. Note that any SQL\*Plus connection
 warnings (user password expiration, etc) will interfere with the
 ability of the wrapper script to communicate with the DB.
 
@@ -803,10 +821,10 @@ cd plsql
 ORACLE_LOGON=myuser/mypass@ORCL ./wrap.sh stepX_YYY.sql
 ```
 
-### Postscript Level 2/3
+### PostScript Level 2/3
 
-The Postscript implementation of mal requires ghostscript to run. It
-has been tested with ghostscript 9.10.
+The PostScript implementation of mal requires Ghostscript to run. It
+has been tested with Ghostscript 9.10.
 
 ```
 cd ps
@@ -995,6 +1013,18 @@ It has been tested with Node.js v6.
 cd ts
 make
 node ./stepX_YYY.js
+```
+
+### Vala
+
+The Vala implementation of mal has been tested with the Vala 0.40.8
+compiler. You will need to install `valac` and `libreadline-dev` or
+equivalent.
+
+```
+cd vala
+make
+./stepX_YYY
 ```
 
 ### VHDL

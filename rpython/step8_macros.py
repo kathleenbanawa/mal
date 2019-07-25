@@ -77,6 +77,7 @@ def EVAL(ast, env):
         #print("EVAL %s" % printer._pr_str(ast))
         if not types._list_Q(ast):
             return eval_ast(ast, env)
+        if len(ast) == 0: return ast
 
         # apply list
         ast = macroexpand(ast, env)
@@ -167,7 +168,6 @@ def entry_point(argv):
     REP("(def! not (fn* (a) (if a false true)))", repl_env)
     REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))", repl_env)
     REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))", repl_env)
-    REP("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) `(let* (or_FIXME ~(first xs)) (if or_FIXME or_FIXME (or ~@(rest xs))))))))", repl_env)
 
     if len(argv) >= 2:
         REP('(load-file "' + argv[1] + '")', repl_env)

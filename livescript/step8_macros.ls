@@ -299,6 +299,9 @@ rep = (line) ->
     |> (ast) -> pr_str ast, print_readably=true
 
 
+# Define not.
+rep '(def! not (fn* (x) (if x false true)))'
+
 # Define load-file.
 rep '
 (def! load-file 
@@ -317,17 +320,6 @@ rep '
           (nth xs 1)
           (throw "odd number of forms to cond"))
         (cons \'cond (rest (rest xs)))))))'
-
-# Define or.
-rep '
-(defmacro! or
-  (fn* (& xs)
-    (if (empty? xs)
-      nil
-      (if (= 1 (count xs))
-        (first xs)
-        `(let* (or_FIXME ~(first xs))
-          (if or_FIXME or_FIXME (or ~@(rest xs))))))))'
 
 # Parse program arguments.
 # The first two (exe and core-file) are, respectively,

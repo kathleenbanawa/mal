@@ -89,7 +89,7 @@ mal_println: procedure expose values. /* mal_println(...) */
   say res
   return new_nil()
 
-mal_read_string: procedure expose values. /* mal_read_string(str) */
+mal_read_string: procedure expose values. err /* mal_read_string(str) */
   return read_str(obj_val(arg(1)))
 
 mal_readline: procedure expose values. /* mal_readline(prompt) */
@@ -99,7 +99,7 @@ mal_readline: procedure expose values. /* mal_readline(prompt) */
   return new_nil()
 
 mal_slurp: procedure expose values. /* mal_read_string(filename) */
-  file_content = charin(obj_val(arg(1)), , 100000)
+  file_content = charin(obj_val(arg(1)), 1, 100000)
   return new_string(file_content)
 
 mal_lt: procedure expose values. /* mal_lt(a, b) */
