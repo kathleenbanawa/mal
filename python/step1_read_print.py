@@ -11,7 +11,7 @@ def EVAL(ast, env):
     return ast
 
 def PRINT(exp):
-    return printer.pr_str(exp)
+    return printer.pr_str(exp, True)
 
 def rep(s):
     return PRINT(EVAL(READ(s), ""))

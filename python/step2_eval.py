@@ -42,7 +42,7 @@ def EVAL(ast, env):
         return eval_ast(ast, env)
 
 def PRINT(exp):
-    return printer.pr_str(exp)
+    return printer.pr_str(exp, True)
 
 def rep(s):
     repl_env = {'+': lambda a,b: a+b,

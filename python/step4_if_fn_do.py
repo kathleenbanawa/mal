@@ -2,6 +2,7 @@
 import sys
 import reader
 import printer
+import core
 from mal_types import *
 from mal_errors import *
 from env import *
@@ -12,16 +13,13 @@ def READ(s):
 def eval_ast(ast, env):
     if isinstance(ast, MalSymbol):
         v = env.get(ast.name)
-        if v:
+        if v is not None:
             return v
         else:
             print(ast.name, "not found.")
             raise(MalKeyException())
     elif isinstance(ast, list):
-        rn = []
-        for e in ast:
-            rn.append(EVAL(e, env))
-        return rn
+        return [EVAL(e, env) for e in ast]
     elif isinstance(ast, MalVector):
         rn = MalVector()
         for e in ast.elements:
@@ -38,7 +36,7 @@ def EVAL(ast, env):
             return ast
         else:
             first = ast[0]
-            if isinstance(first, MalSymbol) and first.name in ["def!", "let*"]:
+            if isinstance(first, MalSymbol) and first.name in ["def!", "let*", "do", "if", "fn*"]:
                 if first.name == "def!":
                     return env.set(ast[1].name, EVAL(ast[2], env))
                 elif first.name == "let*":
@@ -51,11 +49,22 @@ def EVAL(ast, env):
                         for a, b in zip(second.elements[::2], second.elements[1::2]):
                             let_env.set(a.name, EVAL(b, let_env))
                     return EVAL(ast[2], let_env)
+                elif first.name == "do":
+                    return eval_ast(ast[1:], env)[-1]
+                elif first.name == "if":
+                    eval_first = EVAL(ast[1], env)
+                    if not isinstance(eval_first, MalFalse) and not isinstance(eval_first, MalNil):
+                        return EVAL(ast[2], env)
+                    else:
+                        if len(ast) > 3:
+                            return EVAL(ast[3], env)
+                        else:
+                            return MalNil()
+                elif first.name == "fn*":
+                    return (lambda *args: EVAL(ast[2], Env(env, ast[1], args)))
             else:
                 rn = eval_ast(ast, env)
-                f, a, b = rn[0], rn[1], rn[2]
-                result = f(a, b)
-                return(result)
+                return(rn[0](*rn[1:]))
     else:
         return eval_ast(ast, env)
 
@@ -66,10 +75,10 @@ def rep(s):
     return PRINT(EVAL(READ(s), repl_env))
     
 repl_env = Env()
-repl_env.set('+', (lambda a,b: a+b))
-repl_env.set('-', (lambda a,b: a-b))
-repl_env.set('*', (lambda a,b: a*b))
-repl_env.set('/', (lambda a,b: int(a/b)))
+for a, b in core.ns.items():
+    repl_env.set(a, b)
+
+EVAL(READ("(def! not (fn* (a) (if a false true)))"), repl_env)
 
 while True:
     try:
