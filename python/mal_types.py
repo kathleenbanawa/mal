@@ -12,6 +12,10 @@ class MalSymbol:
     def __str__(self):
         return self.name
 
+class MalString:
+    def __init__(self, string):
+        self.string = string
+
 class MalVector:
     def __init__(self):
         self.elements = []
@@ -38,3 +42,7 @@ class MalFunction:
         self.params = params
         self.env = env
         self.fn = fn
+
+class MalAtom:
+    def __init__(self, value):
+        self.value = value

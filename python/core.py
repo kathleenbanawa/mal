@@ -1,5 +1,7 @@
 from mal_types import *
 import printer
+import reader
+import inspect
 
 def lt(*args):
     return MalTrue() if args[0] < args[1] else MalFalse()
@@ -29,6 +31,41 @@ def prn(*args):
     print(printer.pr_str(args[0], True))
     return MalNil()
 
+def slurp(arg):
+    with open(arg.string, "r") as fp:
+        text = fp.read()
+    return text
+
+def mal_str(*args):
+    return printer.pr_str(args)
+
+def read_str(arg):
+    if isinstance(arg, MalString):
+        return reader.read_str(arg.string)
+    elif isinstance(arg, str):
+        return reader.read_str(arg)
+    else:
+        raise(Exception("Unexpected type:"%type(arg)))
+
+def reset_atom(*args):
+    assert(len(args) == 2)
+    args[0].value = args[1]
+    return args[1]
+
+def swap_atom(*args):
+    assert(isinstance(args[0], MalAtom))
+    atom = args[0]
+    params = [atom.value]
+    if len(args) > 2:
+        params.extend(args[2:])
+    if isinstance(args[1], MalFunction):
+        atom.value = args[1].fn(*params)
+    elif inspect.isfunction(args[1]):
+        atom.value = args[1](*params)
+    else:
+        raise(Exception("Unexpected type:"%type(args[1])))
+    return atom.value
+
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
       '*': (lambda *args: args[0]*args[1]),
@@ -42,5 +79,13 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'list': (lambda *a: list(a)),
       'empty?': (lambda a: MalTrue() if len(a) == 0 else MalFalse()),
       'count': (lambda a: len(a) if isinstance(a, list) else 0),
-      'prn': (lambda *args: prn(*args))
+      'prn': (lambda *args: prn(*args)),
+      'read-string': (lambda arg: read_str(arg)),
+      'slurp': (lambda arg: slurp(arg)),
+      'str': (lambda *args: mal_str(*args)),
+      'atom': (lambda arg: MalAtom(arg)),
+      'atom?': (lambda arg: MalTrue() if isinstance(arg, MalAtom) else MalFalse()),
+      'deref': (lambda arg: arg.value),
+      'reset!': (lambda *args: reset_atom(*args)),
+      'swap!': (lambda *args: swap_atom(*args))
 }

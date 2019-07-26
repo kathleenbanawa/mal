@@ -28,6 +28,8 @@ def read_atom(reader):
             return MalTrue()
         elif token == 'false':
             return MalFalse()
+        elif token.startswith("\"") and token.endswith("\""):
+            return MalString(token[1:-1])
         else:
             return MalSymbol(token)
 
@@ -69,8 +71,8 @@ def read_form(reader):
 def tokenize(s):
     pattern = """[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)"""
     m = re.findall(pattern, s)
-    #print("tokens:", m)
     return m
 
 def read_str(s):
+    assert(s)
     return read_form(Reader(tokenize(s)))
