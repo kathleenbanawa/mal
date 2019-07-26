@@ -31,3 +31,10 @@ class MalTrue:
 class MalFalse:
     def __str__(self):
         return "false"
+
+class MalFunction:
+    def __init__(self, ast, params, env, fn):
+        self.ast = ast
+        self.params = params
+        self.env = env
+        self.fn = fn
