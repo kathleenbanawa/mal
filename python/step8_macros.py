@@ -32,16 +32,36 @@ def eval_ast(ast, env):
         return ast
 
 def EVAL(input_ast, env):
-    while True:
+    def is_macro_call(ast, env):
+        if isinstance(ast, list) and len(ast) > 0:
+            first = ast[0]
+            if isinstance(first, MalSymbol):
+                fn = env.get(first.name)
+                if fn is not None and isinstance(fn, MalFunction) and fn.is_macro:
+                    return True
+        return False
+    def macroexpand(input_ast, env):
         ast = input_ast
+        while is_macro_call(ast, env):
+            first = ast[0]
+            fn = env.get(first.name)
+            ast = fn.fn(ast[1:])
+        return ast
+
+    while True:
+        ast = macroexpand(input_ast, env)
         if isinstance(ast, list):
             if len(ast) == 0:
                 return ast
             else:
                 first = ast[0]
-                if isinstance(first, MalSymbol) and first.name in ["def!", "let*", "do", "if", "fn*", "quote", "quasiquote"]:
+                if isinstance(first, MalSymbol) and first.name in ["def!", "defmacro!", "let*", "do", "if", "fn*", "quote", "quasiquote", "defmacro!", "macroexpand"]:
                     if first.name == "def!":
                         return env.set(ast[1].name, EVAL(ast[2], env))
+                    elif first.name == "defmacro!":
+                        fn = EVAL(ast[2], env)
+                        fn.is_macro = True
+                        return env.set(ast[1].name, fn)
                     elif first.name == "let*":
                         let_env = Env(env)
                         second = ast[1]
@@ -67,7 +87,7 @@ def EVAL(input_ast, env):
                             else:
                                 return MalNil()
                     elif first.name == "fn*":
-                        return MalFunction(ast[2], ast[1], env, (lambda *args: EVAL(ast[2], Env(env, ast[1], args))))
+                        return MalFunction(ast[2], ast[1], env, (lambda *args: EVAL(ast[2], Env(env, ast[1], *args))))
                     elif first.name == "quote":
                         return ast[1]
                     elif first.name == "quasiquote":
@@ -84,6 +104,8 @@ def EVAL(input_ast, env):
                                 return [MalSymbol("cons"), quasiquote(ast[0]), quasiquote(ast[1:])]
                         param = ast[1].elements if isinstance(ast[1], MalVector) else ast[1]
                         input_ast = quasiquote(param)
+                    elif first.name == "macroexpand":
+                        return macroexpand(ast[1], env)
                 else:
                     rn = eval_ast(ast, env)
                     if isinstance(rn[0], MalFunction):

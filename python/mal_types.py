@@ -37,11 +37,12 @@ class MalFalse:
         return "false"
 
 class MalFunction:
-    def __init__(self, ast, params, env, fn):
+    def __init__(self, ast, params, env, fn, is_macro=False):
         self.ast = ast
         self.params = params
         self.env = env
         self.fn = fn
+        self.is_macro = is_macro
 
 class MalAtom:
     def __init__(self, value):
