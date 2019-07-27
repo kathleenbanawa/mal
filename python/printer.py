@@ -21,7 +21,8 @@ def pr_str(ast, print_readably=False):
         return str(ast)
     elif isinstance(ast, MalString):
         if print_readably:
-            return "\"" + ast.string + "\""
+            if not ast.string.startswith(":") or ast.string == ":":
+                return "\"" + ast.string + "\""
         return ast.string
     elif isinstance(ast, list):
         result = []
@@ -33,6 +34,11 @@ def pr_str(ast, print_readably=False):
         for e in ast.elements:
             result.append(pr_str(e, print_readably))
         return "[" + " ".join(result) + "]"
+    elif isinstance(ast, MalHashMap):
+        result = []
+        for e in ast.elements:
+            result.append(pr_str(e, print_readably) + " " + pr_str(ast.elements[e], print_readably))
+        return "{" + " ".join(result) + "}"
     elif isinstance(ast, tuple):
         if len(ast) == 1 and isinstance(ast[0], MalSymbol):
             return ast[0].name

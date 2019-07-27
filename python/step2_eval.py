@@ -24,6 +24,11 @@ def eval_ast(ast, env):
         for e in ast.elements:
             rn.elements.append(EVAL(e, env))
         return rn
+    elif isinstance(ast, MalHashMap):
+        rn = MalHashMap()
+        for e in ast.elements:
+            rn.elements[e] = EVAL(ast.elements[e], env)
+        return rn
     elif isinstance(ast, str):
         raise(MalKeyException())
     else:

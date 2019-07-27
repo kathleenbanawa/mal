@@ -30,6 +30,8 @@ def read_atom(reader):
             return MalFalse()
         elif token.startswith("\"") and token.endswith("\""):
             return MalString(token[1:-1])
+        elif token.startswith(":"):
+            return MalString(token)
         else:
             return MalSymbol(token)
 
@@ -53,6 +55,19 @@ def read_vector(reader):
             rn.elements.append(form)
     return rn
 
+def read_hash_map(reader):
+    rn = MalHashMap()
+    tokens = []
+    while True:
+        form = read_form(reader)
+        if isinstance(form, MalSymbol) and form.name == '}':
+            break
+        else:
+            tokens.append(form)
+    for a, b in zip(tokens[::2], tokens[1::2]):
+        rn.elements[a] = b
+    return rn
+
 def read_form(reader):
     rn = None
     if reader.peek() == '':
@@ -63,6 +78,9 @@ def read_form(reader):
     elif reader.peek() == '[':
         reader.next()
         rn = read_vector(reader)
+    elif reader.peek() == '{':
+        reader.next()
+        rn = read_hash_map(reader)
     elif reader.peek() == '\'':
         reader.next()
         return [MalSymbol("quote"), read_form(reader)]
@@ -75,6 +93,9 @@ def read_form(reader):
     elif reader.peek() == '~@':
         reader.next()
         return [MalSymbol("splice-unquote"), read_form(reader)]
+    elif reader.peek() == '@':
+        reader.next()
+        return [MalSymbol("deref"), read_form(reader)]
     else:
         rn = read_atom(reader)
         reader.next()
@@ -82,8 +103,9 @@ def read_form(reader):
 
 def tokenize(s):
     pattern = """[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)"""
-    m = re.findall(pattern, s)
-    return m
+    tokens = re.findall(pattern, s)
+    #print("tokens", tokens)
+    return tokens
 
 def read_str(s):
     assert(s)

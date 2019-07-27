@@ -22,7 +22,7 @@ class MalVector:
 
 class MalHashMap:
     def __init__(self):
-        self.elements = []
+        self.elements = {}
 
 class MalNil:
     def __str__(self):
