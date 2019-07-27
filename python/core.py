@@ -17,6 +17,8 @@ def gte(*args):
 
 def eq(*args):
     assert(len(args) == 2)
+    if isinstance(args[0], MalString) and isinstance(args[1], str):
+        return MalTrue() if args[0].string == args[1] else MalFalse()
     if type(args[0]) != type(args[1]):
         return MalFalse()
     if type(args[0]) in [MalFalse, MalTrue, MalNil]:
@@ -24,6 +26,8 @@ def eq(*args):
     if isinstance(args[0], list):
         if len(args[0]) != len(args[1]):
             return MalFalse()
+    if type(args[0]) == MalSymbol:
+        return MalTrue() if args[0].name == args[1].name else MalFalse()
     return MalTrue() if args[0] == args[1] else MalFalse()
 
 def prn(*args):
@@ -66,6 +70,12 @@ def swap_atom(*args):
         raise(Exception("Unexpected type:"%type(args[1])))
     return atom.value
 
+def concat(*args):
+    rt = []
+    for e in args:
+        rt.extend(e)
+    return rt
+
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
       '*': (lambda *args: args[0]*args[1]),
@@ -87,5 +97,7 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'atom?': (lambda arg: MalTrue() if isinstance(arg, MalAtom) else MalFalse()),
       'deref': (lambda arg: arg.value),
       'reset!': (lambda *args: reset_atom(*args)),
-      'swap!': (lambda *args: swap_atom(*args))
+      'swap!': (lambda *args: swap_atom(*args)),
+      'cons': (lambda *args: [args[0]]+args[1]),
+      'concat': (lambda *args: concat(*args))
 }
