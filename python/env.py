@@ -1,8 +1,12 @@
+from mal_types import *
+
 class Env:
     def __init__(self, outer=None, binds=None, exprs=None):
         self.outer = outer
         self.data = {}
         if binds:
+            if isinstance(binds, MalVector):
+                binds = binds.elements
             for i in range(0, len(binds)):
                 if binds[i].name == "&":
                     assert(binds[i] != binds[-1] and binds[i+1])

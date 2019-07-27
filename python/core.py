@@ -1,4 +1,5 @@
 from mal_types import *
+from mal_errors import *
 import printer
 import reader
 import inspect
@@ -90,6 +91,35 @@ def cons(*args):
             return rt
     return [args[0]] + args[1]
 
+def nth(*args):
+    assert(args and len(args) == 2)
+    assert(isinstance(args[1], int))
+    input_list = args[0]
+    index = args[1]
+    if isinstance(args[0], MalVector):
+        input_list = args[0].elements
+    if index >= len(input_list):
+        raise(MalIndexOutOfBoundsException())
+    return input_list[index]
+
+def first(arg):
+    if arg is None or isinstance(arg, MalNil):
+        return MalNil()
+    input_list = arg
+    if isinstance(arg, MalVector):
+        input_list = arg.elements
+    if len(input_list) == 0:
+        return MalNil()
+    return input_list[0]
+
+def rest(arg):
+    if arg is None or isinstance(arg, MalNil):
+        return []
+    input_list = arg
+    if isinstance(arg, MalVector):
+        input_list = arg.elements
+    return input_list[1:]
+
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
       '*': (lambda *args: args[0]*args[1]),
@@ -113,5 +143,8 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'reset!': (lambda *args: reset_atom(*args)),
       'swap!': (lambda *args: swap_atom(*args)),
       'cons': (lambda *args: cons(*args)),
-      'concat': (lambda *args: concat(*args))
+      'concat': (lambda *args: concat(*args)),
+      'nth': (lambda *args: nth(*args)),
+      'first': (lambda arg: first(arg)),
+      'rest': (lambda arg: rest(arg))
 }

@@ -3,3 +3,6 @@ class MalKeyException(Exception):
 
 class MalEOFException(Exception):
     pass
+
+class MalIndexOutOfBoundsException(Exception):
+    pass
