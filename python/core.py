@@ -33,7 +33,10 @@ def eq(*args):
 
 def prn(*args):
     assert(args)
-    print(printer.pr_str(args[0], True))
+    result = []
+    for e in args:
+        result.append(printer.pr_str(e, True))
+    print(" ".join(result))
     return MalNil()
 
 def slurp(arg):
@@ -99,7 +102,7 @@ def nth(*args):
     if isinstance(args[0], MalVector):
         input_list = args[0].elements
     if index >= len(input_list):
-        raise(MalIndexOutOfBoundsException())
+        raise(MalIndexOutOfBoundsException("Out of bounds"))
     return input_list[index]
 
 def first(arg):
@@ -119,6 +122,31 @@ def rest(arg):
     if isinstance(arg, MalVector):
         input_list = arg.elements
     return input_list[1:]
+
+def throw(arg):
+    raise(MalThrowException(arg))
+
+def mal_map(*args):
+    rt = []
+    fn = args[0].fn if isinstance(args[0], MalFunction) else args[0]
+    input_list = args[1].elements if isinstance(args[1], MalVector) else args[1]
+    for e in input_list:
+        rt.append(fn(e))
+    return rt
+
+def mal_apply(*args):
+    fn = args[0].fn if isinstance(args[0], MalFunction) else args[0]
+    rest = []
+    for e in args[1:]:
+        if isinstance(e, list):
+            rest.extend(e)
+        elif isinstance(e, MalVector):
+            rest.extend(e.elements)
+        else:
+            rest.append(e)
+    if isinstance(args[0], MalFunction):
+        return fn(rest)
+    return fn(*rest)
 
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
@@ -146,5 +174,12 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'concat': (lambda *args: concat(*args)),
       'nth': (lambda *args: nth(*args)),
       'first': (lambda arg: first(arg)),
-      'rest': (lambda arg: rest(arg))
+      'rest': (lambda arg: rest(arg)),
+      'throw': (lambda arg: throw(arg)),
+      'map': (lambda *args: mal_map(*args)),
+      'apply': (lambda *args: mal_apply(*args)),
+      'nil?': (lambda arg: MalTrue() if isinstance(arg, MalNil) else MalFalse()),
+      'true?': (lambda arg: MalTrue() if isinstance(arg, MalTrue) else MalFalse()),
+      'false?': (lambda arg: MalTrue() if isinstance(arg, MalFalse) else MalFalse()),
+      'symbol?': (lambda arg: MalTrue() if isinstance(arg, MalSymbol) else MalFalse())
 }

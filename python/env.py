@@ -7,6 +7,8 @@ class Env:
         if binds:
             if isinstance(binds, MalVector):
                 binds = binds.elements
+            if not isinstance(exprs, list) and not isinstance(exprs, tuple):
+                exprs = [exprs]
             for i in range(0, len(binds)):
                 if binds[i].name == "&":
                     assert(binds[i] != binds[-1] and binds[i+1])
