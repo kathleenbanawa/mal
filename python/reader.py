@@ -63,6 +63,18 @@ def read_form(reader):
     elif reader.peek() == '[':
         reader.next()
         rn = read_vector(reader)
+    elif reader.peek() == '\'':
+        reader.next()
+        return [MalSymbol("quote"), read_form(reader)]
+    elif reader.peek() == '`':
+        reader.next()
+        return [MalSymbol("quasiquote"), read_form(reader)]
+    elif reader.peek() == '~':
+        reader.next()
+        return [MalSymbol("unquote"), read_form(reader)]
+    elif reader.peek() == '~@':
+        reader.next()
+        return [MalSymbol("splice-unquote"), read_form(reader)]
     else:
         rn = read_atom(reader)
         reader.next()

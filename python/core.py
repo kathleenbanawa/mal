@@ -73,8 +73,22 @@ def swap_atom(*args):
 def concat(*args):
     rt = []
     for e in args:
-        rt.extend(e)
+        if isinstance(e, list):
+            rt.extend(e)
+        elif isinstance(e, MalVector):
+            rt.extend(e.elements)
+        else:
+            raise(Exception("Unexpected type:"%type(e)))
     return rt
+
+def cons(*args):
+    if isinstance(args, tuple):
+        if isinstance(args[1], MalVector):
+            rt = [args[0]]
+            for e in args[1].elements:
+                rt.append(e)
+            return rt
+    return [args[0]] + args[1]
 
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
@@ -98,6 +112,6 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'deref': (lambda arg: arg.value),
       'reset!': (lambda *args: reset_atom(*args)),
       'swap!': (lambda *args: swap_atom(*args)),
-      'cons': (lambda *args: [args[0]]+args[1]),
+      'cons': (lambda *args: cons(*args)),
       'concat': (lambda *args: concat(*args))
 }

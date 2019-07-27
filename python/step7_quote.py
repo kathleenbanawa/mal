@@ -72,17 +72,18 @@ def EVAL(input_ast, env):
                         return ast[1]
                     elif first.name == "quasiquote":
                         def is_pair(x):
-                            return isinstance(x, list) and len(x) > 0
+                            return (isinstance(x, list) and len(x) > 0)
                         def quasiquote(ast):
                             if not is_pair(ast):
                                 return [MalSymbol("quote"), ast]
                             elif isinstance(ast[0], MalSymbol) and ast[0].name == "unquote":
                                 return ast[1]
-                            elif is_pair(ast[0]) and isinstance(ast[0][0], MalSymbol) and ast[0][0].name == "splice-unquote":
+                            elif is_pair(ast[0]) and isinstance(ast[0], list) and isinstance(ast[0][0], MalSymbol) and ast[0][0].name == "splice-unquote":
                                 return [MalSymbol("concat"), ast[0][1], quasiquote(ast[1:])]
                             else:
                                 return [MalSymbol("cons"), quasiquote(ast[0]), quasiquote(ast[1:])]
-                        input_ast = quasiquote(ast[1])
+                        param = ast[1].elements if isinstance(ast[1], MalVector) else ast[1]
+                        input_ast = quasiquote(param)
                 else:
                     rn = eval_ast(ast, env)
                     if isinstance(rn[0], MalFunction):
