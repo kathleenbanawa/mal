@@ -28,8 +28,10 @@ def read_atom(reader):
             return MalTrue()
         elif token == 'false':
             return MalFalse()
-        elif token.startswith("\"") and token.endswith("\""):
-            return MalString(token[1:-1])
+        elif token.startswith("\""):
+            if token.endswith("\""):
+                return MalString(token[1:-1])
+            raise(MalEOFException())
         elif token.startswith(":"):
             return MalString(token)
         else:
@@ -96,13 +98,17 @@ def read_form(reader):
     elif reader.peek() == '@':
         reader.next()
         return [MalSymbol("deref"), read_form(reader)]
+    elif reader.peek() == '^':
+        reader.next()
+        meta = read_form(reader)
+        return [MalSymbol("with-meta"), read_form(reader), meta]
     else:
         rn = read_atom(reader)
         reader.next()
     return rn
 
 def tokenize(s):
-    pattern = """[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)"""
+    pattern = """[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:\\\\.|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}('\"`,;)]*)"""
     tokens = re.findall(pattern, s)
     #print("tokens", tokens)
     return tokens
