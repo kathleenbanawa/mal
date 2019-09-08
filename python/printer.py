@@ -20,10 +20,7 @@ def pr_str(ast, print_readably=False):
     elif isinstance(ast, MalSymbol):
         return str(ast)
     elif isinstance(ast, MalString):
-        if print_readably:
-            if not ast.string.startswith(":") or ast.string == ":":
-                return "\"" + ast.string + "\""
-        return ast.string
+        return pr_str(ast.string, print_readably)
     elif isinstance(ast, list):
         result = []
         for e in ast:
@@ -40,12 +37,14 @@ def pr_str(ast, print_readably=False):
             result.append(pr_str(e, print_readably) + " " + pr_str(ast.elements[e], print_readably))
         return "{" + " ".join(result) + "}"
     elif isinstance(ast, tuple):
-        if len(ast) == 1 and isinstance(ast[0], MalSymbol):
-            return ast[0].name
-        else:
-            assert(len(ast) == 3 and isinstance(ast[0], MalString) and isinstance(ast[1], str) and isinstance(ast[2], MalString))
-            return ast[0].string + ast[1] + ast[2].string
-        raise(Exception("Invalid tuple"%ast))
+        if len(ast) == 0:
+            return ""
+        elif len(ast) == 1:
+            if isinstance(ast[0], MalSymbol):
+                return ast[0].name
+            elif isinstance(ast[0], MalString):
+                return ast[0].string
+        return " ".join([pr_str(e, print_readably) for e in ast])
     elif isinstance(ast, MalAtom):
         return "(atom " + str(ast.value) + ")"
     else:

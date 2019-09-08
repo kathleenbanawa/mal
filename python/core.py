@@ -39,6 +39,10 @@ def prn(*args):
     print(" ".join(result))
     return MalNil()
 
+def println(*args):
+    print(" ".join([printer.pr_str(e, False) for e in args]))
+    return MalNil()
+
 def slurp(arg):
     with open(arg.string, "r") as fp:
         text = fp.read()
@@ -148,6 +152,9 @@ def mal_apply(*args):
         return fn(rest)
     return fn(*rest)
 
+def readline(arg):
+    pass
+
 ns = {'+': (lambda *args: args[0]+args[1]),
       '-': (lambda *args: args[0]-args[1]),
       '*': (lambda *args: args[0]*args[1]),
@@ -162,6 +169,7 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'empty?': (lambda a: MalTrue() if len(a) == 0 else MalFalse()),
       'count': (lambda a: len(a) if isinstance(a, list) else 0),
       'prn': (lambda *args: prn(*args)),
+      'println': (lambda *args: println(*args)),
       'read-string': (lambda arg: read_str(arg)),
       'slurp': (lambda arg: slurp(arg)),
       'str': (lambda *args: mal_str(*args)),
@@ -181,5 +189,6 @@ ns = {'+': (lambda *args: args[0]+args[1]),
       'nil?': (lambda arg: MalTrue() if isinstance(arg, MalNil) else MalFalse()),
       'true?': (lambda arg: MalTrue() if isinstance(arg, MalTrue) else MalFalse()),
       'false?': (lambda arg: MalTrue() if isinstance(arg, MalFalse) else MalFalse()),
-      'symbol?': (lambda arg: MalTrue() if isinstance(arg, MalSymbol) else MalFalse())
+      'symbol?': (lambda arg: MalTrue() if isinstance(arg, MalSymbol) else MalFalse()),
+      'readline': (lambda arg: readline(arg))
 }
